@@ -9,7 +9,6 @@
 Thread t;
 Ticker servo_ticker;
 PwmOut pin5(D5), pin6(D6);
-
 static BufferedSerial xbee(D1, D0);
 static BufferedSerial pc(STDIO_UART_TX, STDIO_UART_RX);
 
@@ -21,8 +20,6 @@ RPCFunction Parking(&parking, "parking");
 void reply_messange(char *xbee_reply, char *messange);
 void check_addr(char *xbee_reply, char *messenger);
 
-void check(void);
-
 int main()
 {     
     pc.set_baud(9600);
@@ -30,6 +27,8 @@ int main()
     char buf[256], outbuf[256];
     FILE *devin = fdopen(&xbee, "r");
     FILE *devout = fdopen(&xbee, "w");
+
+    //t.start(check);
 
     while (1) {
         memset(buf, 0, 256);
@@ -63,8 +62,9 @@ void parking(Arguments *in, Reply *out) {
     // first and fourth argument : length of table                               
     car.setCalibTable(11, pwm_table0, speed_table0, 11, pwm_table1, speed_table1);
 
-    car.goStraightCalib(-4.8);
-    ThisThread::sleep_for((d2 / 3) * 1000);
+    car.goStraight(-200);
+    //car.goStraightCalib(-8);
+    ThisThread::sleep_for((d2 / 3) * 450);
     car.stop();
     
     ThisThread::sleep_for(500ms);
@@ -77,9 +77,10 @@ void parking(Arguments *in, Reply *out) {
     ThisThread::sleep_for(1410);
     car.stop();
 
-    ThisThread::sleep_for(500);
-    car.goStraightCalib(-5);
-    ThisThread::sleep_for((d1 / 5) * 500);
+    ThisThread::sleep_for(1200ms);
+    car.goStraight(-200);
+    //car.goStraightCalib(-8);
+    ThisThread::sleep_for((d1 / 5) * 300);
     car.stop();
     ThisThread::sleep_for(500ms);
 }
@@ -108,12 +109,3 @@ void check_addr(char *xbee_reply, char *messenger){
    xbee_reply[3] = '\0';
 }
 
-void check(void){
-   while(1){
-      /*if(xbee.readable()){
-            char recv[1];
-            xbee.read(recv, sizeof(recv));
-            printf("%c", recv[0]);
-      }*/
-   }
-}
